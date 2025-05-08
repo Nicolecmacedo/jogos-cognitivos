@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo das Emoções - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .emotion-card {
+            transition: transform 0.3s ease;
+        }
+        .emotion-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-green-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-green-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-star mr-2"></i>
+                            Pontuação: <span id="score" class="font-bold">0</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-question-circle mr-2"></i>
+                            Questão: <span id="question-number" class="font-bold">0/10</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Area -->
+            <div id="game-area" class="space-y-8 mb-8">
+                <!-- Question Display -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 id="question" class="text-xl font-bold text-center mb-6">
+                        Clique em "Iniciar" para começar o jogo
+                    </h2>
+                    <div id="emotion-display" class="text-center text-8xl mb-6">
+                        😊
+                    </div>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="options" class="grid grid-cols-2 gap-4">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+
+                <!-- Feedback Message -->
+                <div id="feedback" class="hidden bg-white rounded-xl shadow-lg p-6 text-center">
+                    <p class="text-xl font-bold mb-2"></p>
+                    <p class="text-gray-600"></p>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Observe a expressão mostrada</li>
+                    <li>Escolha a emoção que melhor corresponde à expressão</li>
+                    <li>Ganhe pontos por cada resposta correta</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const emotions = [
+            // Emoções Básicas
+            { emoji: '😊', name: 'Felicidade', description: 'Representa alegria e satisfação', feedback: { correct: 'Excelente observação! A felicidade é uma emoção fundamental que nos ajuda a construir relacionamentos positivos e enfrentar desafios.', incorrect: 'Esta expressão mostra felicidade. Observe o sorriso genuíno e os olhos levemente fechados, características típicas da alegria verdadeira.' } },
+            { emoji: '😢', name: 'Tristeza', description: 'Expressa melancolia ou pesar', feedback: { correct: 'Muito bem! Reconhecer a tristeza nos ajuda a desenvolver empatia e oferecer apoio quando necessário.', incorrect: 'Esta é uma expressão de tristeza. É importante reconhecê-la para podermos compreender e apoiar uns aos outros.' } },
+            { emoji: '😠', name: 'Raiva', description: 'Demonstra irritação ou fúria', feedback: { correct: 'Correto! A raiva é uma emoção natural que nos alerta sobre situações que precisam de mudança.', incorrect: 'Esta expressão indica raiva. Aprender a identificá-la nos ajuda a gerenciar melhor nossos sentimentos e conflitos.' } },
+            
+            // Emoções Secundárias
+            { emoji: '😨', name: 'Medo', description: 'Indica apreensão ou susto', feedback: { correct: 'Ótimo! O medo é uma emoção protetora que nos ajuda a identificar e evitar situações potencialmente perigosas.', incorrect: 'Esta é uma expressão de medo. É uma emoção importante para nossa sobrevivência e autoproteção.' } },
+            { emoji: '😮', name: 'Surpresa', description: 'Mostra espanto ou admiração', feedback: { correct: 'Perfeito! A surpresa nos ajuda a estar atentos a mudanças em nosso ambiente.', incorrect: 'Esta expressão mostra surpresa. Note as sobrancelhas elevadas e a boca aberta, sinais típicos desta emoção.' } },
+            { emoji: '🤢', name: 'Nojo', description: 'Expressa repulsa ou aversão', feedback: { correct: 'Exato! O nojo é uma emoção protetora que nos ajuda a evitar situações potencialmente prejudiciais.', incorrect: 'Esta expressão representa nojo. É uma emoção que nos protege de situações ou substâncias que podem nos fazer mal.' } },
+            
+            // Emoções Complexas
+            { emoji: '😐', name: 'Neutro', description: 'Demonstra indiferença ou calma', feedback: { correct: 'Muito bem! A expressão neutra é importante para manter a objetividade em certas situações.', incorrect: 'Esta é uma expressão neutra. Representa um estado emocional equilibrado ou reservado.' } },
+            { emoji: '🥰', name: 'Amor', description: 'Representa afeto e carinho', feedback: { correct: 'Excelente! O amor é uma emoção fundamental para criar vínculos e relacionamentos saudáveis.', incorrect: 'Esta expressão representa amor. Note as características de afeto e carinho na expressão.' } },
+            
+            // Estados Emocionais
+            { emoji: '😴', name: 'Sono', description: 'Indica cansaço ou sonolência', feedback: { correct: 'Correto! Reconhecer sinais de sono é importante para manter um ciclo saudável de descanso.', incorrect: 'Esta expressão indica sono. É importante reconhecer estes sinais para manter uma boa higiene do sono.' } },
+            { emoji: '🤔', name: 'Pensativo', description: 'Mostra reflexão ou dúvida', feedback: { correct: 'Muito bem! O estado pensativo indica processamento cognitivo ativo e curiosidade.', incorrect: 'Esta expressão indica estado pensativo. Demonstra concentração e processamento de informações.' } },
+            
+            // Emoções Sociais
+            { emoji: '😳', name: 'Vergonha', description: 'Expressa embaraço ou timidez', feedback: { correct: 'Excelente! A vergonha é uma emoção social que nos ajuda a navegar situações sociais.', incorrect: 'Esta expressão indica vergonha. É uma emoção comum em situações sociais desafiadoras.' } },
+            { emoji: '🥺', name: 'Súplica', description: 'Demonstra pedido ou necessidade', feedback: { correct: 'Muito bem! Reconhecer expressões de súplica nos ajuda a identificar quando alguém precisa de ajuda.', incorrect: 'Esta expressão indica súplica. É importante para comunicar necessidades e pedir ajuda.' } },
+            
+            // Estados Motivacionais
+            { emoji: '😤', name: 'Determinação', description: 'Mostra força e persistência', feedback: { correct: 'Perfeito! A determinação é crucial para alcançar objetivos e superar desafios.', incorrect: 'Esta expressão mostra determinação. Representa força de vontade e persistência.' } },
+            { emoji: '🤩', name: 'Entusiasmo', description: 'Expressa excitação e motivação', feedback: { correct: 'Excelente! O entusiasmo nos impulsiona a explorar e aprender coisas novas.', incorrect: 'Esta expressão representa entusiasmo. É uma emoção que nos motiva e energiza.' } },
+            
+            // Emoções Mistas
+            { emoji: '😅', name: 'Alívio Nervoso', description: 'Mistura de ansiedade e alívio', feedback: { correct: 'Ótimo! O alívio nervoso é uma emoção complexa que combina diferentes estados emocionais.', incorrect: 'Esta expressão mostra alívio nervoso. É uma combinação de ansiedade e alívio.' } },
+            { emoji: '😏', name: 'Satisfação Irônica', description: 'Mistura de satisfação e ironia', feedback: { correct: 'Muito bem! A satisfação irônica é uma emoção sofisticada que envolve múltiplos significados.', incorrect: 'Esta expressão indica satisfação irônica. Combina elementos de satisfação com um toque de ironia.' } }
+        ];
+
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const scoreDisplay = document.getElementById('score');
+        const questionNumber = document.getElementById('question-number');
+        const questionDisplay = document.getElementById('question');
+        const emotionDisplay = document.getElementById('emotion-display');
+        const optionsContainer = document.getElementById('options');
+        const feedbackDisplay = document.getElementById('feedback');
+
+        let currentQuestion = 0;
+        let score = 0;
+        let currentEmotions = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createOptionButton(emotion) {
+            const button = document.createElement('button');
+            button.className = 'emotion-card bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow';
+            button.innerHTML = `
+                <div class="text-xl font-bold mb-2">${emotion.name}</div>
+                <div class="text-gray-600 text-sm">${emotion.description}</div>
+            `;
+            return button;
+        }
+
+        function showFeedback(correct, emotion, feedbackText) {
+            feedbackDisplay.classList.remove('hidden', 'bg-green-50', 'bg-red-50');
+            feedbackDisplay.classList.add(correct ? 'bg-green-50' : 'bg-red-50');
+            
+            const title = feedbackDisplay.querySelector('p:first-child');
+            const description = feedbackDisplay.querySelector('p:last-child');
+            
+            title.textContent = correct ? 'Muito bem!' : 'Vamos aprender juntos!';
+            title.className = `text-xl font-bold mb-2 ${correct ? 'text-green-600' : 'text-blue-600'}`;
+            
+            description.textContent = feedbackText;
+            
+            // Adiciona animação suave
+            feedbackDisplay.style.opacity = '0';
+            feedbackDisplay.style.transform = 'translateY(-10px)';
+            feedbackDisplay.style.transition = 'opacity 0.3s, transform 0.3s';
+            
+            setTimeout(() => {
+                feedbackDisplay.style.opacity = '1';
+                feedbackDisplay.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        function displayQuestion() {
+            // Update progress
+            questionNumber.textContent = `${currentQuestion + 1}/10`;
+            
+            // Get current emotion and three random different emotions
+            const currentEmotion = currentEmotions[currentQuestion];
+            const otherEmotions = emotions
+                .filter(e => e !== currentEmotion)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
+            
+            // Display emotion
+            emotionDisplay.textContent = currentEmotion.emoji;
+            questionDisplay.textContent = 'Qual emoção esta expressão representa?';
+            
+            // Create and shuffle options
+            const options = shuffleArray([currentEmotion, ...otherEmotions]);
+            
+            // Clear and populate options container
+            optionsContainer.innerHTML = '';
+            options.forEach(emotion => {
+                const button = createOptionButton(emotion);
+                button.addEventListener('click', () => checkAnswer(emotion, currentEmotion));
+                optionsContainer.appendChild(button);
+            });
+            
+            // Hide feedback
+            feedbackDisplay.classList.add('hidden');
+        }
+
+        function checkAnswer(selected, correct) {
+            const isCorrect = selected === correct;
+            if (isCorrect) score += 10;
+            scoreDisplay.textContent = score;
+            
+            const feedback = isCorrect ? correct.feedback.correct : correct.feedback.incorrect;
+            showFeedback(isCorrect, correct, feedback);
+            
+            // Update button styles
+            optionsContainer.querySelectorAll('button').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent.includes(correct.name)) {
+                    btn.classList.add('bg-green-100', 'border-2', 'border-green-500');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < 10) {
+                    displayQuestion();
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        function startGame() {
+            score = 0;
+            currentQuestion = 0;
+            scoreDisplay.textContent = score;
+            
+            // Shuffle and select 10 emotions for the game
+            currentEmotions = shuffleArray([...emotions]).slice(0, 10);
+            
+            displayQuestion();
+            
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+        }
+
+        function endGame() {
+            questionDisplay.textContent = `Jogo finalizado! Sua pontuação: ${score}/100`;
+            emotionDisplay.textContent = score >= 70 ? '🎉' : '👏';
+            optionsContainer.innerHTML = '';
+            feedbackDisplay.classList.add('hidden');
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        function resetGame() {
+            score = 0;
+            currentQuestion = 0;
+            scoreDisplay.textContent = score;
+            questionNumber.textContent = '0/10';
+            questionDisplay.textContent = 'Clique em "Iniciar" para começar o jogo';
+            emotionDisplay.textContent = '😊';
+            optionsContainer.innerHTML = '';
+            feedbackDisplay.classList.add('hidden');
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
