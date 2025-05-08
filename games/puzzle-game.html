@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quebra-Cabeça - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .puzzle-piece {
+            transition: transform 0.2s;
+            user-select: none;
+        }
+        .puzzle-piece.dragging {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+        .puzzle-slot.highlight {
+            background-color: rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-blue-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-clock mr-2"></i>
+                            Tempo: <span id="timer" class="font-bold">00:00</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-puzzle-piece mr-2"></i>
+                            Peças Corretas: <span id="score" class="font-bold">0/9</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Puzzle Board -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Tabuleiro</h2>
+                    <div id="puzzle-board" class="grid grid-cols-3 gap-1 w-full aspect-square bg-gray-100 rounded-lg">
+                        <!-- Puzzle slots will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Puzzle Pieces -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Peças</h2>
+                    <div id="puzzle-pieces" class="grid grid-cols-3 gap-2">
+                        <!-- Puzzle pieces will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Arraste as peças do quebra-cabeça para o tabuleiro</li>
+                    <li>Coloque cada peça em sua posição correta</li>
+                    <li>Complete o quebra-cabeça o mais rápido possível</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const puzzleBoard = document.getElementById('puzzle-board');
+        const puzzlePieces = document.getElementById('puzzle-pieces');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('score');
+
+        let timer = null;
+        let startTime = null;
+        let correctPieces = 0;
+        const totalPieces = 9;
+        const numbers = Array.from({length: 9}, (_, i) => i + 1);
+
+        function createPuzzleSlot(index) {
+            const slot = document.createElement('div');
+            slot.className = 'puzzle-slot w-full aspect-square border-2 border-gray-200 rounded flex items-center justify-center';
+            slot.dataset.index = index;
+            
+            slot.addEventListener('dragover', e => {
+                e.preventDefault();
+                slot.classList.add('highlight');
+            });
+            
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('highlight');
+            });
+            
+            slot.addEventListener('drop', handleDrop);
+            
+            return slot;
+        }
+
+        function createPuzzlePiece(number) {
+            const piece = document.createElement('div');
+            piece.className = 'puzzle-piece w-full aspect-square bg-blue-600 text-white text-2xl font-bold flex items-center justify-center rounded cursor-move';
+            piece.textContent = number;
+            piece.draggable = true;
+            piece.dataset.number = number;
+            
+            piece.addEventListener('dragstart', e => {
+                piece.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', number);
+            });
+            
+            piece.addEventListener('dragend', () => {
+                piece.classList.remove('dragging');
+            });
+            
+            return piece;
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const slot = e.target;
+            slot.classList.remove('highlight');
+            
+            const pieceNumber = parseInt(e.dataTransfer.getData('text/plain'));
+            const slotIndex = parseInt(slot.dataset.index);
+            
+            if (pieceNumber === slotIndex + 1) {
+                const piece = document.querySelector(`[data-number="${pieceNumber}"]`);
+                slot.appendChild(piece);
+                piece.draggable = false;
+                piece.classList.remove('cursor-move');
+                correctPieces++;
+                scoreDisplay.textContent = `${correctPieces}/${totalPieces}`;
+                
+                if (correctPieces === totalPieces) {
+                    gameWon();
+                }
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            // Reset game state
+            correctPieces = 0;
+            scoreDisplay.textContent = `${correctPieces}/${totalPieces}`;
+            puzzleBoard.innerHTML = '';
+            puzzlePieces.innerHTML = '';
+            startTime = Date.now();
+            
+            // Create puzzle slots
+            for (let i = 0; i < 9; i++) {
+                puzzleBoard.appendChild(createPuzzleSlot(i));
+            }
+            
+            // Create and shuffle puzzle pieces
+            const shuffledNumbers = shuffleArray([...numbers]);
+            shuffledNumbers.forEach(number => {
+                puzzlePieces.appendChild(createPuzzlePiece(number));
+            });
+            
+            // Start timer
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            // Update UI
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+        }
+
+        function gameWon() {
+            clearInterval(timer);
+            setTimeout(() => {
+                alert('Parabéns! Você completou o quebra-cabeça!');
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            }, 500);
+        }
+
+        function resetGame() {
+            clearInterval(timer);
+            timerDisplay.textContent = '00:00';
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            puzzleBoard.innerHTML = '';
+            puzzlePieces.innerHTML = '';
+            correctPieces = 0;
+            scoreDisplay.textContent = `${correctPieces}/${totalPieces}`;
+        }
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
