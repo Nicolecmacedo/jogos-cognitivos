@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memória Sequencial - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .sequence-button {
+            transition: all 0.3s ease;
+        }
+        .sequence-button.active {
+            transform: scale(0.95);
+            filter: brightness(1.2);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-teal-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-teal-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-layer-group mr-2"></i>
+                            Nível: <span id="level" class="font-bold">1</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-star mr-2"></i>
+                            Pontuação: <span id="score" class="font-bold">0</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedback" class="bg-white rounded-xl shadow-lg p-6 mb-8 transform transition-all duration-300 opacity-0">
+                <p class="text-xl font-bold text-center text-teal-600 mb-2">Muito bem!</p>
+                <p class="text-gray-600 text-center">Continue assim!</p>
+            </div>
+
+            <!-- Game Area -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="text-center mb-8">
+                    <h2 id="game-status" class="text-2xl font-bold text-gray-800 mb-4">
+                        Clique em "Iniciar" para começar
+                    </h2>
+                    <p id="sequence-display" class="text-gray-600">
+                        Observe a sequência e repita-a na ordem correta
+                    </p>
+                </div>
+
+                <!-- Sequence Buttons -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <button class="sequence-button aspect-square rounded-xl bg-red-500 hover:bg-red-600 transition-colors" data-color="red">
+                        <i class="fas fa-circle text-4xl text-white"></i>
+                    </button>
+                    <button class="sequence-button aspect-square rounded-xl bg-blue-500 hover:bg-blue-600 transition-colors" data-color="blue">
+                        <i class="fas fa-square text-4xl text-white"></i>
+                    </button>
+                    <button class="sequence-button aspect-square rounded-xl bg-green-500 hover:bg-green-600 transition-colors" data-color="green">
+                        <i class="fas fa-triangle text-4xl text-white"></i>
+                    </button>
+                    <button class="sequence-button aspect-square rounded-xl bg-yellow-500 hover:bg-yellow-600 transition-colors" data-color="yellow">
+                        <i class="fas fa-star text-4xl text-white"></i>
+                    </button>
+                    <button class="sequence-button aspect-square rounded-xl bg-purple-500 hover:bg-purple-600 transition-colors" data-color="purple">
+                        <i class="fas fa-heart text-4xl text-white"></i>
+                    </button>
+                    <button class="sequence-button aspect-square rounded-xl bg-pink-500 hover:bg-pink-600 transition-colors" data-color="pink">
+                        <i class="fas fa-moon text-4xl text-white"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Observe atentamente a sequência de cores e formas</li>
+                    <li>Repita a sequência clicando nos botões na mesma ordem</li>
+                    <li>A cada acerto, a sequência aumenta</li>
+                    <li>Erro na sequência = fim do jogo</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const levelDisplay = document.getElementById('level');
+        const scoreDisplay = document.getElementById('score');
+        const gameStatus = document.getElementById('game-status');
+        const sequenceDisplay = document.getElementById('sequence-display');
+        const feedbackDisplay = document.getElementById('feedback');
+        const buttons = document.querySelectorAll('.sequence-button');
+
+        const gameData = {
+            sequence: [],
+            playerSequence: [],
+            level: 1,
+            score: 0,
+            isPlaying: false,
+            canPlay: false
+        };
+
+        const feedback = {
+            success: [
+                'Excelente! Sua memória de trabalho está se fortalecendo!',
+                'Muito bem! Continue desenvolvendo sua atenção!',
+                'Ótimo! Você está melhorando sua capacidade de memorização!',
+                'Incrível! Sua memória sequencial está cada vez melhor!'
+            ],
+            levelUp: [
+                'Parabéns! Você está pronto para uma sequência mais longa!',
+                'Excelente progresso! Vamos aumentar o desafio!',
+                'Muito bem! Sua memória está se expandindo!'
+            ],
+            gameOver: [
+                'Não desanime! Cada tentativa fortalece sua memória!',
+                'Continue praticando! Você está desenvolvendo habilidades importantes!',
+                'Tente novamente! A prática leva à perfeição!'
+            ]
+        };
+
+        function showFeedback(type) {
+            const messages = feedback[type];
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            
+            feedbackDisplay.querySelector('p:last-child').textContent = message;
+            feedbackDisplay.classList.remove('opacity-0');
+            
+            setTimeout(() => {
+                feedbackDisplay.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function activateButton(button) {
+            return new Promise(resolve => {
+                button.classList.add('active');
+                setTimeout(() => {
+                    button.classList.remove('active');
+                    setTimeout(resolve, 100);
+                }, 500);
+            });
+        }
+
+        async function playSequence() {
+            gameData.canPlay = false;
+            gameStatus.textContent = 'Observe a sequência...';
+            
+            for (const color of gameData.sequence) {
+                const button = document.querySelector(`[data-color="${color}"]`);
+                await activateButton(button);
+            }
+            
+            gameStatus.textContent = 'Sua vez! Repita a sequência';
+            gameData.canPlay = true;
+        }
+
+        function addToSequence() {
+            const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'pink'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            gameData.sequence.push(randomColor);
+        }
+
+        function handleButtonClick(e) {
+            if (!gameData.isPlaying || !gameData.canPlay) return;
+            
+            const button = e.currentTarget;
+            const color = button.dataset.color;
+            
+            activateButton(button);
+            gameData.playerSequence.push(color);
+            
+            const currentIndex = gameData.playerSequence.length - 1;
+            
+            if (color !== gameData.sequence[currentIndex]) {
+                gameOver();
+                return;
+            }
+            
+            if (gameData.playerSequence.length === gameData.sequence.length) {
+                gameData.score += 10;
+                scoreDisplay.textContent = gameData.score;
+                showFeedback('success');
+                
+                setTimeout(() => {
+                    gameData.level++;
+                    levelDisplay.textContent = gameData.level;
+                    gameData.playerSequence = [];
+                    addToSequence();
+                    showFeedback('levelUp');
+                    playSequence();
+                }, 1000);
+            }
+        }
+
+        function startGame() {
+            gameData.sequence = [];
+            gameData.playerSequence = [];
+            gameData.level = 1;
+            gameData.score = 0;
+            gameData.isPlaying = true;
+            
+            levelDisplay.textContent = gameData.level;
+            scoreDisplay.textContent = gameData.score;
+            
+            addToSequence();
+            playSequence();
+            
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+        }
+
+        function gameOver() {
+            gameData.isPlaying = false;
+            gameData.canPlay = false;
+            gameStatus.textContent = 'Fim de jogo!';
+            showFeedback('gameOver');
+            
+            setTimeout(() => {
+                alert(`Fim de jogo! Você alcançou o nível ${gameData.level} com ${gameData.score} pontos!`);
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            }, 500);
+        }
+
+        function resetGame() {
+            gameData.sequence = [];
+            gameData.playerSequence = [];
+            gameData.level = 1;
+            gameData.score = 0;
+            gameData.isPlaying = false;
+            gameData.canPlay = false;
+            
+            levelDisplay.textContent = gameData.level;
+            scoreDisplay.textContent = gameData.score;
+            gameStatus.textContent = 'Clique em "Iniciar" para começar';
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', handleButtonClick);
+        });
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
