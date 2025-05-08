@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palavras Cruzadas - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .crossword-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.75rem;
+            color: #4a5568;
+        }
+        .cell-input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+        }
+        .cell-input:focus {
+            outline: 2px solid #fbbf24;
+        }
+        .blocked {
+            background-color: #1a202c;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-yellow-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-yellow-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-4xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Palavras Encontradas: <span id="found-words" class="font-bold">0/6</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-clock mr-2"></i>
+                            Tempo: <span id="timer" class="font-bold">00:00</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-yellow-600 text-white px-6 py-2 rounded-full hover:bg-yellow-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Crossword Grid -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Palavras Cruzadas</h2>
+                    <div id="crossword-grid" class="grid grid-cols-8 gap-0.5 w-fit mx-auto">
+                        <!-- Grid will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Clues -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Dicas</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Horizontal</h3>
+                            <ul class="space-y-2 text-gray-600" id="horizontal-clues">
+                                <!-- Horizontal clues will be added here -->
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Vertical</h3>
+                            <ul class="space-y-2 text-gray-600" id="vertical-clues">
+                                <!-- Vertical clues will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Leia as dicas horizontais e verticais</li>
+                    <li>Digite as letras nos quadrados correspondentes</li>
+                    <li>Complete todas as palavras para vencer</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const timerDisplay = document.getElementById('timer');
+        const foundWordsDisplay = document.getElementById('found-words');
+        const crosswordGrid = document.getElementById('crossword-grid');
+        const horizontalClues = document.getElementById('horizontal-clues');
+        const verticalClues = document.getElementById('vertical-clues');
+
+        let timer = null;
+        let startTime = null;
+        let foundWords = 0;
+
+        const wordCategories = {
+            ciencias: [
+                { word: 'ÁTOMO', clue: 'Menor partícula que mantém as propriedades de um elemento' },
+                { word: 'CÉLULA', clue: 'Unidade básica da vida' },
+                { word: 'FÓTON', clue: 'Partícula de luz' }
+            ],
+            geografia: [
+                { word: 'CLIMA', clue: 'Conjunto de condições atmosféricas' },
+                { word: 'RELEVO', clue: 'Formas da superfície terrestre' },
+                { word: 'DELTA', clue: 'Foz de rio em forma triangular' }
+            ],
+            historia: [
+                { word: 'INCA', clue: 'Antiga civilização da América do Sul' },
+                { word: 'IDADE', clue: 'Período histórico, como Média ou Moderna' },
+                { word: 'REINO', clue: 'Território governado por um monarca' }
+            ],
+            portugues: [
+                { word: 'VERSO', clue: 'Cada linha de um poema' },
+                { word: 'SÍLABA', clue: 'Unidade sonora da palavra' },
+                { word: 'TEXTO', clue: 'Conjunto coerente de palavras' }
+            ],
+            matematica: [
+                { word: 'ÁREA', clue: 'Medida de uma superfície' },
+                { word: 'CUBO', clue: 'Sólido com seis faces iguais' },
+                { word: 'SOMA', clue: 'Resultado da adição' }
+            ]
+        };
+
+        const feedbackMessages = {
+            progress: [
+                'Você está indo muito bem! Continue assim!',
+                'Excelente progresso! Sua dedicação está aparecendo!',
+                'Que legal ver você aprendendo! Continue explorando!',
+                'Você está desenvolvendo seu vocabulário de forma incrível!'
+            ],
+            success: [
+                'Parabéns! Cada palavra descoberta é um novo conhecimento!',
+                'Incrível! Você está expandindo seu vocabulário!',
+                'Excelente! Seu esforço está rendendo frutos!',
+                'Muito bem! Continue essa jornada de aprendizado!'
+            ],
+            encouragement: [
+                'Você está quase lá! Tente observar as letras que já descobriu.',
+                'Não desista! Cada tentativa te aproxima da resposta.',
+                'Que tal reler a dica com atenção? Você consegue!',
+                'Você está aprendendo mesmo quando erra. Continue tentando!'
+            ]
+        };
+
+        // Seleciona palavras aleatórias das categorias para criar o jogo
+        function selectRandomWords() {
+            const selected = {
+                horizontal: [],
+                vertical: []
+            };
+            
+            const categories = Object.keys(wordCategories);
+            const usedPositions = new Set();
+            
+            // Seleciona 3 palavras horizontais
+            for (let i = 0; i < 3; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const words = wordCategories[category];
+                const word = words[Math.floor(Math.random() * words.length)];
+                
+                let position;
+                do {
+                    position = {
+                        row: 1 + i * 2,
+                        col: Math.floor(Math.random() * (8 - word.word.length))
+                    };
+                } while (checkPositionOverlap(position, word.word.length, true, usedPositions));
+                
+                markPositionUsed(position, word.word.length, true, usedPositions);
+                selected.horizontal.push({
+                    ...word,
+                    row: position.row,
+                    col: position.col,
+                    clue: `${i + 1}. ${word.clue}`
+                });
+            }
+            
+            // Seleciona 3 palavras verticais
+            for (let i = 0; i < 3; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const words = wordCategories[category];
+                const word = words[Math.floor(Math.random() * words.length)];
+                
+                let position;
+                do {
+                    position = {
+                        row: Math.floor(Math.random() * (8 - word.word.length)),
+                        col: 1 + i * 2
+                    };
+                } while (checkPositionOverlap(position, word.word.length, false, usedPositions));
+                
+                markPositionUsed(position, word.word.length, false, usedPositions);
+                selected.vertical.push({
+                    ...word,
+                    row: position.row,
+                    col: position.col,
+                    clue: `${i + 4}. ${word.clue}`
+                });
+            }
+            
+            return selected;
+        }
+
+        function checkPositionOverlap(position, length, isHorizontal, usedPositions) {
+            const key = pos => `${pos.row},${pos.col}`;
+            
+            for (let i = 0; i < length; i++) {
+                const pos = isHorizontal
+                    ? { row: position.row, col: position.col + i }
+                    : { row: position.row + i, col: position.col };
+                    
+                if (usedPositions.has(key(pos))) return true;
+            }
+            
+            return false;
+        }
+
+        function markPositionUsed(position, length, isHorizontal, usedPositions) {
+            const key = pos => `${pos.row},${pos.col}`;
+            
+            for (let i = 0; i < length; i++) {
+                const pos = isHorizontal
+                    ? { row: position.row, col: position.col + i }
+                    : { row: position.row + i, col: position.col };
+                    
+                usedPositions.add(key(pos));
+            }
+        }
+
+        const words = selectRandomWords();
+        };
+
+        function createGrid() {
+            crosswordGrid.innerHTML = '';
+            // Create 8x8 grid
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'crossword-cell relative bg-white';
+                    
+                    // Check if cell should be part of a word
+                    let isPartOfWord = false;
+                    let cellNumber = null;
+                    
+                    // Check horizontal words
+                    words.horizontal.forEach((word, idx) => {
+                        if (i === word.row && j >= word.col && j < word.col + word.word.length) {
+                            isPartOfWord = true;
+                            if (j === word.col) cellNumber = idx * 2 + 1;
+                        }
+                    });
+                    
+                    // Check vertical words
+                    words.vertical.forEach((word, idx) => {
+                        if (j === word.col && i >= word.row && i < word.row + word.word.length) {
+                            isPartOfWord = true;
+                            if (i === word.row) cellNumber = (idx + 1) * 2;
+                        }
+                    });
+
+                    if (isPartOfWord) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.className = 'cell-input';
+                        input.dataset.row = i;
+                        input.dataset.col = j;
+                        input.addEventListener('input', handleInput);
+                        input.addEventListener('keydown', handleKeyDown);
+                        cell.appendChild(input);
+                        
+                        if (cellNumber !== null) {
+                            const number = document.createElement('span');
+                            number.className = 'cell-number';
+                            number.textContent = cellNumber;
+                            cell.appendChild(number);
+                        }
+                    } else {
+                        cell.classList.add('blocked');
+                    }
+                    
+                    crosswordGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function populateClues() {
+            horizontalClues.innerHTML = words.horizontal
+                .map(word => `<li>${word.clue}</li>`)
+                .join('');
+            
+            verticalClues.innerHTML = words.vertical
+                .map(word => `<li>${word.clue}</li>`)
+                .join('');
+        }
+
+        function handleInput(e) {
+            const input = e.target;
+            input.value = input.value.toUpperCase();
+            
+            if (input.value) {
+                const nextInput = findNextInput(input);
+                if (nextInput) nextInput.focus();
+            }
+            
+            checkWords();
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Backspace' && !e.target.value) {
+                const prevInput = findPrevInput(e.target);
+                if (prevInput) {
+                    prevInput.focus();
+                    prevInput.value = '';
+                }
+            }
+        }
+
+        function findNextInput(currentInput) {
+            const inputs = Array.from(document.querySelectorAll('.cell-input'));
+            const currentIndex = inputs.indexOf(currentInput);
+            return inputs[currentIndex + 1] || null;
+        }
+
+        function findPrevInput(currentInput) {
+            const inputs = Array.from(document.querySelectorAll('.cell-input'));
+            const currentIndex = inputs.indexOf(currentInput);
+            return inputs[currentIndex - 1] || null;
+        }
+
+        function checkWords() {
+            foundWords = 0;
+            
+            // Check horizontal words
+            words.horizontal.forEach(word => {
+                let found = true;
+                for (let i = 0; i < word.word.length; i++) {
+                    const input = document.querySelector(
+                        `.cell-input[data-row="${word.row}"][data-col="${word.col + i}"]`
+                    );
+                    if (!input || input.value !== word.word[i]) {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) foundWords++;
+            });
+            
+            // Check vertical words
+            words.vertical.forEach(word => {
+                let found = true;
+                for (let i = 0; i < word.word.length; i++) {
+                    const input = document.querySelector(
+                        `.cell-input[data-row="${word.row + i}"][data-col="${word.col}"]`
+                    );
+                    if (!input || input.value !== word.word[i]) {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) foundWords++;
+            });
+            
+            foundWordsDisplay.textContent = `${foundWords}/6`;
+            
+            if (foundWords === 6) {
+                gameWon();
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+        }
+
+        function startGame() {
+            // Reset game state
+            createGrid();
+            populateClues();
+            foundWords = 0;
+            foundWordsDisplay.textContent = '0/6';
+            startTime = Date.now();
+            
+            // Enable inputs
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.disabled = false;
+                input.value = '';
+            });
+            
+            // Start timer
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            // Update UI
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+        }
+
+        function gameWon() {
+            clearInterval(timer);
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.disabled = true;
+            });
+            
+            setTimeout(() => {
+                alert('Parabéns! Você completou as palavras cruzadas!');
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            }, 500);
+        }
+
+        function resetGame() {
+            clearInterval(timer);
+            timerDisplay.textContent = '00:00';
+            foundWords = 0;
+            foundWordsDisplay.textContent = '0/6';
+            
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.value = '';
+                input.disabled = true;
+            });
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        // Initialize game
+        createGrid();
+        populateClues();
+        document.querySelectorAll('.cell-input').forEach(input => {
+            input.disabled = true;
+        });
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
