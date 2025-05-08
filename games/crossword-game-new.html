@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palavras Cruzadas - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .crossword-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.75rem;
+            color: #4a5568;
+        }
+        .cell-input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        .cell-input:focus {
+            outline: 2px solid #fbbf24;
+            background-color: #fef3c7;
+        }
+        .cell-input.correct {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+        .blocked {
+            background-color: #1a202c;
+        }
+        .clue-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .clue-item:hover {
+            background-color: #f3f4f6;
+        }
+        .clue-item.active {
+            background-color: #fef3c7;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-yellow-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-yellow-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-6xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Palavras Encontradas: <span id="found-words" class="font-bold">0/6</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-clock mr-2"></i>
+                            Tempo: <span id="timer" class="font-bold">00:00</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-yellow-600 text-white px-6 py-2 rounded-full hover:bg-yellow-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                        <button id="hint-btn" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Dica
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedback" class="bg-white rounded-xl shadow-lg p-6 mb-8 transform transition-all duration-300 opacity-0 translate-y-4">
+                <p class="text-xl font-bold text-center text-yellow-600 mb-2">Muito bem!</p>
+                <p class="text-gray-600 text-center">Continue assim! Você está aprendendo!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Crossword Grid -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Palavras Cruzadas</h2>
+                    <div id="crossword-grid" class="grid grid-cols-8 gap-0.5 w-fit mx-auto">
+                        <!-- Grid will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Clues -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Dicas</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Horizontal</h3>
+                            <ul class="space-y-2" id="horizontal-clues">
+                                <!-- Horizontal clues will be added here -->
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-700 mb-2">Vertical</h3>
+                            <ul class="space-y-2" id="vertical-clues">
+                                <!-- Vertical clues will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Leia as dicas horizontais e verticais</li>
+                    <li>Digite as letras nos quadrados correspondentes</li>
+                    <li>Use o botão "Dica" se precisar de ajuda</li>
+                    <li>Complete todas as palavras para vencer</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const wordCategories = {
+            ciencias: [
+                { word: 'ÁTOMO', clue: 'Menor partícula que mantém as propriedades de um elemento' },
+                { word: 'CÉLULA', clue: 'Unidade básica da vida' },
+                { word: 'FÓTON', clue: 'Partícula de luz' }
+            ],
+            geografia: [
+                { word: 'CLIMA', clue: 'Conjunto de condições atmosféricas' },
+                { word: 'RELEVO', clue: 'Formas da superfície terrestre' },
+                { word: 'DELTA', clue: 'Foz de rio em forma triangular' }
+            ],
+            historia: [
+                { word: 'INCA', clue: 'Antiga civilização da América do Sul' },
+                { word: 'IDADE', clue: 'Período histórico, como Média ou Moderna' },
+                { word: 'REINO', clue: 'Território governado por um monarca' }
+            ],
+            portugues: [
+                { word: 'VERSO', clue: 'Cada linha de um poema' },
+                { word: 'SÍLABA', clue: 'Unidade sonora da palavra' },
+                { word: 'TEXTO', clue: 'Conjunto coerente de palavras' }
+            ],
+            matematica: [
+                { word: 'ÁREA', clue: 'Medida de uma superfície' },
+                { word: 'CUBO', clue: 'Sólido com seis faces iguais' },
+                { word: 'SOMA', clue: 'Resultado da adição' }
+            ]
+        };
+
+        const feedbackMessages = {
+            progress: [
+                'Você está indo muito bem! Continue assim!',
+                'Excelente progresso! Sua dedicação está aparecendo!',
+                'Que legal ver você aprendendo! Continue explorando!',
+                'Você está desenvolvendo seu vocabulário de forma incrível!'
+            ],
+            success: [
+                'Parabéns! Cada palavra descoberta é um novo conhecimento!',
+                'Incrível! Você está expandindo seu vocabulário!',
+                'Excelente! Seu esforço está rendendo frutos!',
+                'Muito bem! Continue essa jornada de aprendizado!'
+            ],
+            encouragement: [
+                'Você está quase lá! Tente observar as letras que já descobriu.',
+                'Não desista! Cada tentativa te aproxima da resposta.',
+                'Que tal reler a dica com atenção? Você consegue!',
+                'Você está aprendendo mesmo quando erra. Continue tentando!'
+            ]
+        };
+
+        function getRandomFeedback(type) {
+            const messages = feedbackMessages[type];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        function showFeedback(type) {
+            const feedback = document.getElementById('feedback');
+            const message = getRandomFeedback(type);
+            
+            feedback.querySelector('p:last-child').textContent = message;
+            feedback.classList.remove('opacity-0', 'translate-y-4');
+            
+            setTimeout(() => {
+                feedback.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+        }
+
+        function selectRandomWords() {
+            const selected = {
+                horizontal: [],
+                vertical: []
+            };
+            
+            const categories = Object.keys(wordCategories);
+            const usedPositions = new Set();
+            
+            // Seleciona 3 palavras horizontais
+            for (let i = 0; i < 3; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const words = wordCategories[category];
+                const word = words[Math.floor(Math.random() * words.length)];
+                
+                let position;
+                do {
+                    position = {
+                        row: 1 + i * 2,
+                        col: Math.floor(Math.random() * (8 - word.word.length))
+                    };
+                } while (checkPositionOverlap(position, word.word.length, true, usedPositions));
+                
+                markPositionUsed(position, word.word.length, true, usedPositions);
+                selected.horizontal.push({
+                    ...word,
+                    row: position.row,
+                    col: position.col,
+                    clue: `${i + 1}. ${word.clue}`
+                });
+            }
+            
+            // Seleciona 3 palavras verticais
+            for (let i = 0; i < 3; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const words = wordCategories[category];
+                const word = words[Math.floor(Math.random() * words.length)];
+                
+                let position;
+                do {
+                    position = {
+                        row: Math.floor(Math.random() * (8 - word.word.length)),
+                        col: 1 + i * 2
+                    };
+                } while (checkPositionOverlap(position, word.word.length, false, usedPositions));
+                
+                markPositionUsed(position, word.word.length, false, usedPositions);
+                selected.vertical.push({
+                    ...word,
+                    row: position.row,
+                    col: position.col,
+                    clue: `${i + 4}. ${word.clue}`
+                });
+            }
+            
+            return selected;
+        }
+
+        function checkPositionOverlap(position, length, isHorizontal, usedPositions) {
+            const key = pos => `${pos.row},${pos.col}`;
+            
+            for (let i = 0; i < length; i++) {
+                const pos = isHorizontal
+                    ? { row: position.row, col: position.col + i }
+                    : { row: position.row + i, col: position.col };
+                    
+                if (usedPositions.has(key(pos))) return true;
+            }
+            
+            return false;
+        }
+
+        function markPositionUsed(position, length, isHorizontal, usedPositions) {
+            const key = pos => `${pos.row},${pos.col}`;
+            
+            for (let i = 0; i < length; i++) {
+                const pos = isHorizontal
+                    ? { row: position.row, col: position.col + i }
+                    : { row: position.row + i, col: position.col };
+                    
+                usedPositions.add(key(pos));
+            }
+        }
+
+        let words = selectRandomWords();
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const timerDisplay = document.getElementById('timer');
+        const foundWordsDisplay = document.getElementById('found-words');
+        const crosswordGrid = document.getElementById('crossword-grid');
+        const horizontalClues = document.getElementById('horizontal-clues');
+        const verticalClues = document.getElementById('vertical-clues');
+
+        let timer = null;
+        let startTime = null;
+        let foundWords = 0;
+        let hintsUsed = 0;
+
+        function createGrid() {
+            crosswordGrid.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'crossword-cell relative bg-white';
+                    
+                    let isPartOfWord = false;
+                    let cellNumber = null;
+                    
+                    words.horizontal.forEach((word, idx) => {
+                        if (i === word.row && j >= word.col && j < word.col + word.word.length) {
+                            isPartOfWord = true;
+                            if (j === word.col) cellNumber = idx * 2 + 1;
+                        }
+                    });
+                    
+                    words.vertical.forEach((word, idx) => {
+                        if (j === word.col && i >= word.row && i < word.row + word.word.length) {
+                            isPartOfWord = true;
+                            if (i === word.row) cellNumber = (idx + 1) * 2;
+                        }
+                    });
+
+                    if (isPartOfWord) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.className = 'cell-input';
+                        input.dataset.row = i;
+                        input.dataset.col = j;
+                        input.addEventListener('input', handleInput);
+                        input.addEventListener('keydown', handleKeyDown);
+                        input.addEventListener('focus', handleFocus);
+                        cell.appendChild(input);
+                        
+                        if (cellNumber !== null) {
+                            const number = document.createElement('span');
+                            number.className = 'cell-number';
+                            number.textContent = cellNumber;
+                            cell.appendChild(number);
+                        }
+                    } else {
+                        cell.classList.add('blocked');
+                    }
+                    
+                    crosswordGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function handleFocus(e) {
+            const input = e.target;
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+            
+            // Remove active class from all clues
+            document.querySelectorAll('.clue-item').forEach(clue => {
+                clue.classList.remove('active');
+            });
+            
+            // Highlight related word's clue
+            words.horizontal.forEach((word, idx) => {
+                if (row === word.row && col >= word.col && col < word.col + word.word.length) {
+                    document.querySelector(`#horizontal-${idx}`).classList.add('active');
+                }
+            });
+            
+            words.vertical.forEach((word, idx) => {
+                if (col === word.col && row >= word.row && row < word.row + word.word.length) {
+                    document.querySelector(`#vertical-${idx}`).classList.add('active');
+                }
+            });
+        }
+
+        function populateClues() {
+            horizontalClues.innerHTML = words.horizontal
+                .map((word, idx) => `<li id="horizontal-${idx}" class="clue-item p-2 rounded-lg">${word.clue}</li>`)
+                .join('');
+            
+            verticalClues.innerHTML = words.vertical
+                .map((word, idx) => `<li id="vertical-${idx}" class="clue-item p-2 rounded-lg">${word.clue}</li>`)
+                .join('');
+            
+            // Add click handlers to clues
+            document.querySelectorAll('.clue-item').forEach(clue => {
+                clue.addEventListener('click', () => {
+                    const [direction, index] = clue.id.split('-');
+                    const word = words[direction][index];
+                    const firstInput = document.querySelector(
+                        `.cell-input[data-row="${word.row}"][data-col="${word.col}"]`
+                    );
+                    if (firstInput) firstInput.focus();
+                });
+            });
+        }
+
+        function handleInput(e) {
+            const input = e.target;
+            input.value = input.value.toUpperCase();
+            
+            if (input.value) {
+                checkWord(input);
+                const nextInput = findNextInput(input);
+                if (nextInput) nextInput.focus();
+            }
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Backspace' && !e.target.value) {
+                const prevInput = findPrevInput(e.target);
+                if (prevInput) {
+                    prevInput.focus();
+                    prevInput.value = '';
+                }
+            }
+        }
+
+        function findNextInput(currentInput) {
+            const inputs = Array.from(document.querySelectorAll('.cell-input'));
+            const currentIndex = inputs.indexOf(currentInput);
+            return inputs[currentIndex + 1] || null;
+        }
+
+        function findPrevInput(currentInput) {
+            const inputs = Array.from(document.querySelectorAll('.cell-input'));
+            const currentIndex = inputs.indexOf(currentInput);
+            return inputs[currentIndex - 1] || null;
+        }
+
+        function checkWord(changedInput) {
+            const row = parseInt(changedInput.dataset.row);
+            const col = parseInt(changedInput.dataset.col);
+            
+            // Check horizontal words
+            words.horizontal.forEach(word => {
+                if (row === word.row && col >= word.col && col < word.col + word.word.length) {
+                    let complete = true;
+                    let correct = true;
+                    const inputs = [];
+                    
+                    for (let i = 0; i < word.word.length; i++) {
+                        const input = document.querySelector(
+                            `.cell-input[data-row="${word.row}"][data-col="${word.col + i}"]`
+                        );
+                        inputs.push(input);
+                        if (!input.value) complete = false;
+                        else if (input.value !== word.word[i]) correct = false;
+                    }
+                    
+                    if (complete) {
+                        inputs.forEach(input => {
+                            input.classList.toggle('correct', correct);
+                        });
+                        if (correct && !inputs[0].classList.contains('found')) {
+                            inputs[0].classList.add('found');
+                            foundWords++;
+                            foundWordsDisplay.textContent = `${foundWords}/6`;
+                            showFeedback('success');
+                        }
+                    }
+                }
+            });
+            
+            // Check vertical words
+            words.vertical.forEach(word => {
+                if (col === word.col && row >= word.row && row < word.row + word.word.length) {
+                    let complete = true;
+                    let correct = true;
+                    const inputs = [];
+                    
+                    for (let i = 0; i < word.word.length; i++) {
+                        const input = document.querySelector(
+                            `.cell-input[data-row="${word.row + i}"][data-col="${word.col}"]`
+                        );
+                        inputs.push(input);
+                        if (!input.value) complete = false;
+                        else if (input.value !== word.word[i]) correct = false;
+                    }
+                    
+                    if (complete) {
+                        inputs.forEach(input => {
+                            input.classList.toggle('correct', correct);
+                        });
+                        if (correct && !inputs[0].classList.contains('found')) {
+                            inputs[0].classList.add('found');
+                            foundWords++;
+                            foundWordsDisplay.textContent = `${foundWords}/6`;
+                            showFeedback('success');
+                        }
+                    }
+                }
+            });
+            
+            if (foundWords === 6) {
+                gameWon();
+            }
+        }
+
+        function giveHint() {
+            if (hintsUsed >= 3) {
+                alert('Você já usou todas as suas dicas!');
+                return;
+            }
+            
+            const emptyInputs = Array.from(document.querySelectorAll('.cell-input'))
+                .filter(input => !input.value);
+            
+            if (emptyInputs.length === 0) {
+                alert('Não há mais espaços vazios para dar dicas!');
+                return;
+            }
+            
+            const input = emptyInputs[Math.floor(Math.random() * emptyInputs.length)];
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+            
+            // Find the correct letter
+            let letter = '';
+            words.horizontal.forEach(word => {
+                if (row === word.row && col >= word.col && col < word.col + word.word.length) {
+                    letter = word.word[col - word.col];
+                }
+            });
+            words.vertical.forEach(word => {
+                if (col === word.col && row >= word.row && row < word.row + word.word.length) {
+                    letter = word.word[row - word.row];
+                }
+            });
+            
+            input.value = letter;
+            input.classList.add('bg-blue-100');
+            checkWord(input);
+            
+            hintsUsed++;
+            showFeedback('encouragement');
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+        }
+
+        function startGame() {
+            // Reset game state
+            words = selectRandomWords();
+            createGrid();
+            populateClues();
+            foundWords = 0;
+            hintsUsed = 0;
+            foundWordsDisplay.textContent = '0/6';
+            startTime = Date.now();
+            
+            // Enable inputs
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.disabled = false;
+                input.value = '';
+                input.classList.remove('correct', 'found', 'bg-blue-100');
+            });
+            
+            // Start timer
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            // Update UI
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+            showFeedback('progress');
+        }
+
+        function gameWon() {
+            clearInterval(timer);
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.disabled = true;
+            });
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            setTimeout(() => {
+                alert(`Parabéns! Você completou o jogo em ${minutes}m${seconds}s usando ${hintsUsed} dicas!`);
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            }, 500);
+        }
+
+        function resetGame() {
+            clearInterval(timer);
+            timerDisplay.textContent = '00:00';
+            foundWords = 0;
+            hintsUsed = 0;
+            foundWordsDisplay.textContent = '0/6';
+            
+            document.querySelectorAll('.cell-input').forEach(input => {
+                input.value = '';
+                input.disabled = true;
+                input.classList.remove('correct', 'found', 'bg-blue-100');
+            });
+            
+            document.querySelectorAll('.clue-item').forEach(clue => {
+                clue.classList.remove('active');
+            });
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        // Initialize game
+        createGrid();
+        populateClues();
+        document.querySelectorAll('.cell-input').forEach(input => {
+            input.disabled = true;
+        });
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+        hintBtn.addEventListener('click', giveHint);
+    </script>
+</body>
+</html>
