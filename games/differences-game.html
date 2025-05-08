@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encontre as Diferenças - JogosCognitivos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .image-container {
+            position: relative;
+            cursor: pointer;
+        }
+        .difference-spot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .difference-spot:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+        .difference-spot.found {
+            border-color: rgb(34, 197, 94);
+            background-color: rgba(34, 197, 94, 0.2);
+        }
+        .difference-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid rgb(34, 197, 94);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-red-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-700 hover:text-red-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Voltar ao Início
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Game Container -->
+    <main class="container mx-auto px-6 pt-24 pb-12">
+        <div class="max-w-6xl mx-auto">
+            <!-- Game Stats -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center">
+                    <div class="space-y-2">
+                        <p class="text-gray-600">
+                            <i class="fas fa-eye mr-2"></i>
+                            Diferenças Encontradas: <span id="differences-found" class="font-bold">0/5</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <i class="fas fa-clock mr-2"></i>
+                            Tempo: <span id="timer" class="font-bold">00:00</span>
+                        </p>
+                    </div>
+                    <div class="space-x-4">
+                        <button id="start-btn" class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            Iniciar
+                        </button>
+                        <button id="reset-btn" class="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Area -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Original Image -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Imagem Original</h2>
+                    <div class="image-container aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                        <img src="https://images.pexels.com/photos/3932930/pexels-photo-3932930.jpeg" 
+                             alt="Imagem Original" 
+                             class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <!-- Modified Image -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Encontre as Diferenças</h2>
+                    <div id="game-image" class="image-container aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                        <img src="https://images.pexels.com/photos/3932930/pexels-photo-3932930.jpeg" 
+                             alt="Imagem com Diferenças" 
+                             class="w-full h-full object-cover">
+                        <!-- Difference spots will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Como Jogar</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Clique em "Iniciar" para começar o jogo</li>
+                    <li>Compare as duas imagens lado a lado</li>
+                    <li>Clique nos pontos onde você encontrar diferenças</li>
+                    <li>Encontre todas as 5 diferenças para vencer</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const timerDisplay = document.getElementById('timer');
+        const differencesFoundDisplay = document.getElementById('differences-found');
+        const gameImage = document.getElementById('game-image');
+
+        let timer = null;
+        let startTime = null;
+        let differencesFound = 0;
+        let gameActive = false;
+
+        // Define difference spots (coordinates are percentages of image dimensions)
+        const differences = [
+            { x: 20, y: 30 },
+            { x: 45, y: 25 },
+            { x: 70, y: 40 },
+            { x: 35, y: 60 },
+            { x: 80, y: 70 }
+        ];
+
+        function createDifferenceSpots() {
+            differences.forEach((diff, index) => {
+                const spot = document.createElement('div');
+                spot.className = 'difference-spot';
+                spot.style.left = `${diff.x}%`;
+                spot.style.top = `${diff.y}%`;
+                spot.style.transform = 'translate(-50%, -50%)';
+                spot.dataset.index = index;
+                
+                spot.addEventListener('click', () => {
+                    if (!gameActive) return;
+                    
+                    if (!spot.classList.contains('found')) {
+                        spot.classList.add('found');
+                        differencesFound++;
+                        differencesFoundDisplay.textContent = `${differencesFound}/5`;
+                        
+                        // Create marker effect
+                        const marker = document.createElement('div');
+                        marker.className = 'difference-marker';
+                        marker.style.left = `${diff.x}%`;
+                        marker.style.top = `${diff.y}%`;
+                        marker.style.transform = 'translate(-50%, -50%)';
+                        gameImage.appendChild(marker);
+                        
+                        if (differencesFound === 5) {
+                            gameWon();
+                        }
+                    }
+                });
+                
+                gameImage.appendChild(spot);
+            });
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+        }
+
+        function startGame() {
+            // Reset game state
+            differencesFound = 0;
+            differencesFoundDisplay.textContent = '0/5';
+            gameActive = true;
+            startTime = Date.now();
+            
+            // Remove existing markers
+            document.querySelectorAll('.difference-marker').forEach(marker => marker.remove());
+            document.querySelectorAll('.difference-spot').forEach(spot => spot.classList.remove('found'));
+            
+            // Start timer
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+            
+            // Update UI
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50');
+        }
+
+        function gameWon() {
+            gameActive = false;
+            clearInterval(timer);
+            
+            setTimeout(() => {
+                alert('Parabéns! Você encontrou todas as diferenças!');
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+            }, 500);
+        }
+
+        function resetGame() {
+            clearInterval(timer);
+            timerDisplay.textContent = '00:00';
+            differencesFound = 0;
+            differencesFoundDisplay.textContent = '0/5';
+            gameActive = false;
+            
+            // Remove markers and reset spots
+            document.querySelectorAll('.difference-marker').forEach(marker => marker.remove());
+            document.querySelectorAll('.difference-spot').forEach(spot => spot.classList.remove('found'));
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+        }
+
+        // Initialize game
+        createDifferenceSpots();
+
+        startBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
