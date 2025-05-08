@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogos Cognitivos - Aprenda e Desenvolva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed w-full top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-purple-600">
+                    <i class="fas fa-brain mr-2"></i>
+                    JogosCognitivos
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#inicio" class="text-gray-700 hover:text-purple-600 transition-colors">Início</a>
+                    <a href="#jogos" class="text-gray-700 hover:text-purple-600 transition-colors">Jogos</a>
+                    <a href="#sobre" class="text-gray-700 hover:text-purple-600 transition-colors">Sobre</a>
+                </div>
+                <button class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="pt-24 pb-12 px-6 bg-gradient-to-br from-purple-600 to-indigo-600 text-white min-h-screen flex items-center">
+        <div class="container mx-auto">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">Desenvolva Sua Mente Brincando</h1>
+                <p class="text-xl md:text-2xl mb-8 text-purple-100">Jogos divertidos para estimulação cognitiva, aprendizagem e desenvolvimento emocional</p>
+                <a href="#jogos" class="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-purple-100 transition-colors inline-block">
+                    Começar a Jogar
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section id="jogos" class="py-16 px-6">
+        <div class="container mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Nossos Jogos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Categoria: Memória -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-purple-500 flex items-center justify-center">
+                        <i class="fas fa-memory text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Jogo da Memória</h3>
+                        <p class="text-gray-600 mb-4">Exercite sua memória e concentração encontrando os pares correspondentes.</p>
+                        <a href="games/memory-game.html" class="inline-block bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categoria: Lógica -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-puzzle-piece text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Quebra-Cabeça</h3>
+                        <p class="text-gray-600 mb-4">Desenvolva o raciocínio lógico e a coordenação visual montando quebra-cabeças.</p>
+                        <a href="games/puzzle-game.html" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categoria: Emoções -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-green-500 flex items-center justify-center">
+                        <i class="fas fa-smile-beam text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Jogo das Emoções</h3>
+                        <p class="text-gray-600 mb-4">Aprenda a reconhecer e entender diferentes emoções de forma divertida.</p>
+                        <a href="games/emotion-game.html" class="inline-block bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categoria: Linguagem -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-yellow-500 flex items-center justify-center">
+                        <i class="fas fa-language text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Palavras Cruzadas</h3>
+                        <p class="text-gray-600 mb-4">Expanda seu vocabulário e exercite a linguagem com palavras cruzadas interativas.</p>
+                        <a href="games/crossword-game-new.html" class="inline-block bg-yellow-600 text-white px-6 py-2 rounded-full hover:bg-yellow-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categoria: Atenção -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-red-500 flex items-center justify-center">
+                        <i class="fas fa-eye text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Encontre as Diferenças</h3>
+                        <p class="text-gray-600 mb-4">Melhore sua atenção aos detalhes encontrando diferenças entre imagens.</p>
+                        <a href="games/differences-game.html" class="inline-block bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categoria: Audição -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-48 bg-indigo-500 flex items-center justify-center">
+                        <i class="fas fa-music text-6xl text-white"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Memória Musical</h3>
+                        <p class="text-gray-600 mb-4">Treine sua memória auditiva reproduzindo sequências de sons.</p>
+                        <a href="games/music-memory-game.html" class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition-colors">
+                            Jogar Agora
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="sobre" class="py-16 px-6 bg-gray-100">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Sobre o Projeto</h2>
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <p class="text-gray-600 mb-6">
+                    Nossa plataforma foi desenvolvida com o objetivo de proporcionar uma experiência divertida e educativa
+                    através de jogos que estimulam diferentes aspectos do desenvolvimento cognitivo e emocional.
+                </p>
+                <p class="text-gray-600 mb-6">
+                    Cada jogo foi cuidadosamente projetado para trabalhar habilidades específicas:
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-3 mb-6">
+                    <li>Memória e concentração</li>
+                    <li>Raciocínio lógico e resolução de problemas</li>
+                    <li>Inteligência emocional e reconhecimento de emoções</li>
+                </ul>
+                <p class="text-gray-600">
+                    Ideal para todas as idades, nossos jogos podem ser utilizados tanto em casa quanto em ambientes
+                    educacionais, contribuindo para o desenvolvimento integral do usuário.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold mb-2">JogosCognitivos</h3>
+                    <p class="text-gray-400">Desenvolvendo mentes através de jogos</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-purple-400 transition-colors">
+                        <i class="fab fa-facebook text-2xl"></i>
+                    </a>
+                    <a href="#" class="hover:text-purple-400 transition-colors">
+                        <i class="fab fa-twitter text-2xl"></i>
+                    </a>
+                    <a href="#" class="hover:text-purple-400 transition-colors">
+                        <i class="fab fa-instagram text-2xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-400 text-sm">
+                &copy; 2024 JogosCognitivos. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuButton = document.querySelector('button');
+        const nav = document.querySelector('.md\\:flex');
+        
+        menuButton.addEventListener('click', () => {
+            nav.classList.toggle('hidden');
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
